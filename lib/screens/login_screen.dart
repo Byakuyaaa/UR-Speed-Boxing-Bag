@@ -11,6 +11,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> login() async {
     try {
@@ -20,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
-      // Navigate to MainMenuScreen if login is successful
       if (userCredential.user != null) {
         Navigator.pushReplacement(
           context,
@@ -28,9 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on FirebaseAuthException catch (_) {
-      // Show a generic error message for incorrect credentials
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Enter Correct Credentials")),
+        SnackBar(content: Text("Enter correct credentials")),
       );
     }
   }
@@ -41,31 +40,43 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Login", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              SizedBox(height: 20),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: "Email", border: OutlineInputBorder()),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: "Password", border: OutlineInputBorder()),
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(onPressed: login, child: Text("Login")),
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Login", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                SizedBox(height: 20),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    border: OutlineInputBorder(),
+                  ),
+                  textInputAction: TextInputAction.next,
                 ),
-                child: Text("Don't have an account? Sign up"),
-              ),
-            ],
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => login(), // Triggers login on Enter
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(onPressed: login, child: Text("Login")),
+                TextButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RegisterScreen()),
+                  ),
+                  child: Text("Don't have an account? Sign up"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
