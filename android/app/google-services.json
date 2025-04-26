@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "826736396563",
+    "project_id": "smartboxingenergy-b5cdf",
+    "storage_bucket": "smartboxingenergy-b5cdf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826736396563:android:313f114398d9fe7b0672e6",
+        "android_client_info": {
+          "package_name": "com.example.projects.projects"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChD1HjbVuNfEwiXx9bSDzoCyaKyJ82gEA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
