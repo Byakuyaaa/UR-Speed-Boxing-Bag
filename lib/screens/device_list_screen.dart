@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'dart:io'; // Needed for InternetAddress
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:multicast_dns/multicast_dns.dart';
-import 'connection_screen.dart';
+import 'safe_mdns_client.dart';
+import 'connection_screen.dart'; // Make sure this path is correct
 
 class DeviceListScreen extends StatefulWidget {
   @override
@@ -11,41 +12,39 @@ class DeviceListScreen extends StatefulWidget {
 
 class _DeviceListScreenState extends State<DeviceListScreen> {
   final List<String> devices = [];
-  final MDnsClient _mDnsClient = MDnsClient();
+  late final SafeMdnsClient _mDnsClient;
   bool scanning = true;
 
   @override
   void initState() {
     super.initState();
+    _mDnsClient = SafeMdnsClient();
     _startMDnsScan();
   }
 
   Future<void> _startMDnsScan() async {
+    setState(() => scanning = true);
     try {
       await _mDnsClient.start();
 
-      await for (final ptr in _mDnsClient.lookup<PtrResourceRecord>(
+      await for (final PtrResourceRecord ptr in _mDnsClient.lookup<PtrResourceRecord>(
         ResourceRecordQuery.serverPointer('_http._tcp.local'),
       )) {
-        final deviceName = ptr.domainName;
-        if (deviceName.contains('esp32') && !devices.contains(deviceName)) {
-          setState(() {
-            devices.add(deviceName);
-          });
+        final name = ptr.domainName;
+        if (name.contains('esp32') && !devices.contains(name)) {
+          setState(() => devices.add(name));
         }
       }
     } catch (e) {
       print('mDNS scan error: $e');
     } finally {
-      setState(() {
-        scanning = false;
-      });
+      setState(() => scanning = false);
       _mDnsClient.stop();
     }
   }
 
   Future<InternetAddress?> _resolveDeviceIP(String domainName) async {
-    await for (final record in _mDnsClient.lookup<IPAddressResourceRecord>(
+    await for (final IPAddressResourceRecord record in _mDnsClient.lookup<IPAddressResourceRecord>(
       ResourceRecordQuery.addressIPv4(domainName),
     )) {
       return record.address;
@@ -54,51 +53,40 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   }
 
   @override
-  void dispose() {
-    _mDnsClient.stop();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Available Devices")),
       body: scanning
           ? Center(child: CircularProgressIndicator())
-          : devices.isNotEmpty
-          ? ListView.builder(
+          : devices.isEmpty
+          ? Center(child: Text("No devices found."))
+          : ListView.builder(
         itemCount: devices.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, i) {
           return ListTile(
             leading: Icon(Icons.memory),
-            title: Text(devices[index]),
+            title: Text(devices[i]),
             trailing: ElevatedButton(
               child: Text("Connect"),
               onPressed: () async {
-                final ip = await _resolveDeviceIP(devices[index]);
+                final ip = await _resolveDeviceIP(devices[i]);
                 if (ip != null) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ConnectionScreen(
-                        deviceName: devices[index],
-                        deviceIP: ip,
-                      ),
+                      builder: (_) => ConnectionScreen(esp32IP: ip),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Could not resolve IP address."),
-                    ),
+                    SnackBar(content: Text("Could not resolve IP.")),
                   );
                 }
               },
             ),
           );
         },
-      )
-          : Center(child: Text("No devices found.")),
+      ),
     );
   }
 }

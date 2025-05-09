@@ -6,25 +6,53 @@ class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Welcome to K.E.H.S.B.B.")),
-      body: Center(
+      backgroundColor: Colors.blueGrey[50],
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.account_circle, size: 100, color: Colors.blueGrey),
-              SizedBox(height: 40),
+              Icon(Icons.sports_mma, size: 100, color: Colors.white),
+              SizedBox(height: 20),
               Text(
-                "Log in or sign-up:",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                "K.E.H.S.B.B.",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                "Kinetic Energy Harvesting Smart Boxing Bag",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                ),
               ),
               SizedBox(height: 40),
               ElevatedButton.icon(
-                icon: Icon(Icons.person),
-                label: Text("Login"),
+                icon: Icon(Icons.login, color: Colors.white),
+                label: Text("Login", style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurpleAccent,
+                  foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -35,10 +63,16 @@ class StartPage extends StatelessWidget {
               ),
               SizedBox(height: 20),
               ElevatedButton.icon(
-                icon: Icon(Icons.admin_panel_settings),
-                label: Text("Sign-up"),
+                icon: Icon(Icons.app_registration, color: Colors.white),
+                label: Text("Sign Up", style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
                 ),
                 onPressed: () {
                   Navigator.push(

@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'register_screen.dart';
-import 'user_main_menu_screen.dart'; // For normal users
-import 'main_menu_screen.dart'; // You’ll create this screen
+import 'user_main_menu_screen.dart';
+import 'main_menu_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
             .get();
 
         if (doc.exists) {
-          final role = doc.data()?['role'] ?? 'user'; // fallback to user
+          final role = doc.data()?['role'] ?? 'user';
 
           if (role == 'admin') {
             Navigator.pushReplacement(
@@ -47,7 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
         } else {
-          // No document found
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("User data not found in Firestore.")),
           );
@@ -58,8 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text("Login failed: ${e.message}")),
       );
     } catch (e) {
-      // Catch any other error (like Firebase document access issues)
-      print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Something went wrong. Try again.")),
       );
@@ -69,45 +66,85 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Login", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                SizedBox(height: 20),
-                TextFormField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: "Email",
-                    border: OutlineInputBorder(),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: BackButton(color: Colors.white),
+      ),
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock_open, size: 100, color: Colors.white),
+                  SizedBox(height: 20),
+                  Text(
+                    "Login",
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  textInputAction: TextInputAction.next,
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    border: OutlineInputBorder(),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    textInputAction: TextInputAction.next,
                   ),
-                  obscureText: true,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => login(),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(onPressed: login, child: Text("Login")),
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterScreen()),
+                  SizedBox(height: 12),
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      fillColor: Colors.white,
+                      filled: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => login(),
                   ),
-                  child: Text("Don't have an account? Sign up"),
-                ),
-              ],
+                  SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: login,
+                    child: Text("Login", style: TextStyle(fontSize: 18)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurpleAccent,
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 5,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterScreen()),
+                    ),
+                    child: Text(
+                      "Don't have an account? Sign up",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

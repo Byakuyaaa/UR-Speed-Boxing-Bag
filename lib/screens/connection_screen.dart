@@ -1,25 +1,23 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:multicast_dns/multicast_dns.dart';
+import 'safe_mdns_client.dart';
 import 'package:flutter/material.dart';
+import 'package:wifi_iot/wifi_iot.dart';
 import 'package:http/http.dart' as http;
-import 'main_menu_screen.dart';
+import 'power_generated_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
-  final String deviceName;
-  final InternetAddress deviceIP;
-
-  const ConnectionScreen({
-    required this.deviceName,
-    required this.deviceIP,
-  });
+  final InternetAddress esp32IP;
+  const ConnectionScreen({required this.esp32IP});
 
   @override
   _ConnectionScreenState createState() => _ConnectionScreenState();
 }
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
-  bool isConnecting = true;
-  String statusMessage = "Connecting...";
+  bool _connecting = true;
+  String _status = "Connecting to ESP32…";
 
   @override
   void initState() {
@@ -28,68 +26,68 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   }
 
   Future<void> _attemptConnection() async {
-    final url = Uri.parse('http://${widget.deviceIP.address}/'); // your ESP32 root
-
     try {
-      final response = await http.get(url).timeout(Duration(seconds: 5));
-      if (response.statusCode == 200 && response.body.contains("ESP32 OK")) {
-        _navigateToMainMenu();
+      // Connect to the ESP32's Wi-Fi SSID if it's an AP,
+      // otherwise assume you're already on the same LAN.
+      // Here we skip Wi-Fi-IoT and go straight to HTTP test:
+      final ipString = widget.esp32IP.address;
+      final uri = Uri.parse('http://$ipString/');
+      final resp = await http.get(uri).timeout(Duration(seconds: 5));
+
+      if (resp.statusCode == 200 && resp.body.contains("ESP32 OK")) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => PowerGeneratedScreen()),
+        );
       } else {
         setState(() {
-          isConnecting = false;
-          statusMessage = "Device responded, but not as expected.";
+          _connecting = false;
+          _status = "Unexpected response from ESP32.";
         });
       }
     } on TimeoutException {
       setState(() {
-        isConnecting = false;
-        statusMessage = "Connection timed out.";
+        _connecting = false;
+        _status = "Connection timed out.";
       });
     } on SocketException {
       setState(() {
-        isConnecting = false;
-        statusMessage = "Could not reach device.";
+        _connecting = false;
+        _status = "Could not reach ESP32.";
       });
     } catch (e) {
       setState(() {
-        isConnecting = false;
-        statusMessage = "Unexpected error: $e";
+        _connecting = false;
+        _status = "Error: $e";
       });
     }
-  }
-
-  void _navigateToMainMenu() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => MainMenuScreen()),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Connecting")),
+      appBar: AppBar(title: Text("Connecting to ESP32")),
       body: Center(
-        child: isConnecting
+        child: _connecting
             ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text("Connecting to ${widget.deviceName}..."),
+            SizedBox(height: 12),
+            Text(_status),
           ],
         )
             : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error, size: 48, color: Colors.red),
-            SizedBox(height: 10),
-            Text(statusMessage),
+            SizedBox(height: 12),
+            Text(_status),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text("Back to Device List"),
-            ),
+            )
           ],
         ),
       ),
