@@ -64,6 +64,44 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+  Future<void> _resetPassword() async {
+    String email = '';
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Reset Password"),
+        content: TextField(
+          onChanged: (value) => email = value.trim(),
+          decoration: InputDecoration(
+            labelText: "Enter your email",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Reset email sent to $email")),
+                );
+              } on FirebaseAuthException catch (e) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error: ${e.message}")),
+                );
+              }
+            },
+            child: Text("Send"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +181,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       "Don't have an account? Sign up",
                       style: TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _resetPassword,
+                    child: Text(
+                      "Forgot Password?",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
