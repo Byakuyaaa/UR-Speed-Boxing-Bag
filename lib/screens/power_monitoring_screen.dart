@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'power_generated_screen.dart';
 
 class PowerMonitoringScreen extends StatefulWidget {
@@ -19,6 +20,9 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
 
   bool _connecting = true;
   String _status = "Connecting to ESP32…";
+
+  List<FlSpot> _chartData = [];
+  double _lastX = 0;
 
   @override
   void initState() {
@@ -65,7 +69,7 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Smart Boxing Energy",
           style: TextStyle(fontSize: 18, color: Colors.white),
         ),
@@ -78,15 +82,15 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
             ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 12),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 12),
             Text(_status),
             if (!_status.contains("Connecting"))
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text("Back to Device List"),
+                  child: const Text("Back to Device List"),
                 ),
               ),
           ],
@@ -98,24 +102,56 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
 
   Widget _buildPowerContent(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: StreamBuilder<DatabaseEvent>(
         stream: ref.onValue,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.snapshot.exists) {
             final value = snapshot.data!.snapshot.value;
-            final power = double.tryParse(value.toString())?.toStringAsFixed(2) ?? "0.00";
+            final power = double.tryParse(value.toString()) ?? 0.0;
+            final powerStr = power.toStringAsFixed(2);
+
+            // Update chart data
+            _chartData.add(FlSpot(_lastX, power));
+            _lastX += 1;
+            if (_chartData.length > 20) {
+              _chartData.removeAt(0);
+            }
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildPowerCard(context, "Real-time Power Output", "$power V"),
-                SizedBox(height: 40),
+                _buildPowerCard(context, "Real-time Power Output", "$powerStr V"),
+                const SizedBox(height: 30),
+                const Text(
+                  "Live Power Sensor Graph",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                AspectRatio(
+                  aspectRatio: 1.6,
+                  child: LineChart(
+                    LineChartData(
+                      titlesData: FlTitlesData(show: false),
+                      borderData: FlBorderData(show: false),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: _chartData,
+                          isCurved: true,
+                          color: Colors.blueAccent,
+                          belowBarData: BarAreaData(show: false),
+                          dotData: FlDotData(show: false),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
                 _buildNavigateButton(context),
               ],
             );
           } else {
-            return Center(child: CircularProgressIndicator(color: Colors.blueAccent));
+            return const Center(child: CircularProgressIndicator(color: Colors.blueAccent));
           }
         },
       ),
@@ -127,7 +163,7 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Colors.blueAccent, Colors.lightBlueAccent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -137,22 +173,22 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
           BoxShadow(
             color: Colors.blueAccent.withOpacity(0.3),
             blurRadius: 20,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Column(
         children: [
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             value,
-            style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
       ),
@@ -161,13 +197,13 @@ class _PowerMonitoringScreenState extends State<PowerMonitoringScreen> {
 
   Widget _buildNavigateButton(BuildContext context) {
     return ElevatedButton.icon(
-      icon: Icon(Icons.analytics, size: 28),
-      label: Text(
+      icon: const Icon(Icons.analytics, size: 28),
+      label: const Text(
         "View Generated Power",
         style: TextStyle(fontSize: 18, color: Colors.white),
       ),
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
         backgroundColor: Colors.blueAccent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

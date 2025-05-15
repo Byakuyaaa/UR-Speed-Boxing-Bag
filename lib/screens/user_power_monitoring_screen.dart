@@ -1,14 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'dart:io';
 
-class UserPowerMonitoringScreen extends StatelessWidget {
+class UserPowerMonitoringScreen extends StatefulWidget {
   final InternetAddress esp32IP;
 
   UserPowerMonitoringScreen({Key? key, required this.esp32IP}) : super(key: key);
 
-  final DatabaseReference _powerRef =
-  FirebaseDatabase.instance.ref("sensorData/power");
+  @override
+  _UserPowerMonitoringScreenState createState() => _UserPowerMonitoringScreenState();
+}
+
+class _UserPowerMonitoringScreenState extends State<UserPowerMonitoringScreen> {
+  final DatabaseReference _powerRef = FirebaseDatabase.instance.ref("sensorData/power");
+  List<FlSpot> _chartData = [];
+  double _lastX = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _powerRef.onValue.listen((event) {
+      final raw = event.snapshot.value;
+      final value = double.tryParse(raw.toString()) ?? 0;
+
+      setState(() {
+        _chartData.add(FlSpot(_lastX, value));
+        _lastX += 1;
+        if (_chartData.length > 20) {
+          _chartData.removeAt(0);
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,40 +51,52 @@ class UserPowerMonitoringScreen extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: StreamBuilder<DatabaseEvent>(
-            stream: _powerRef.onValue,
-            builder: (context, snapshot) {
-              String display;
-              if (snapshot.hasError) {
-                display = "Error";
-              } else if (snapshot.hasData && snapshot.data!.snapshot.exists) {
-                final raw = snapshot.data!.snapshot.value;
-                final power = double.tryParse(raw.toString())?.toStringAsFixed(2) ?? "0.00";
-                display = "$power V";
-              } else {
-                display = "--";
-              }
-
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildPowerCard("Real-time Power Output", display, context),
-                  const SizedBox(height: 24),
-                  Text(
-                    "Connected to ESP32 at: ${esp32IP.address}",
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildPowerCard("Real-time Power Output", context),
+              const SizedBox(height: 24),
+              Text(
+                "Connected to ESP32 at: ${widget.esp32IP.address}",
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 30),
+              const Text(
+                "Live Power Sensor Graph",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              AspectRatio(
+                aspectRatio: 1.6,
+                child: LineChart(
+                  LineChartData(
+                    titlesData: FlTitlesData(show: false),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: _chartData,
+                        isCurved: true,
+                        color: Colors.blueAccent,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: FlDotData(show: false),
+                      ),
+                    ],
                   ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPowerCard(String title, String value, BuildContext context) {
-    final width = MediaQuery.of(context).size.width * 0.8; // 80% width
+  Widget _buildPowerCard(String title, BuildContext context) {
+    final width = MediaQuery.of(context).size.width * 0.8;
+    final latestValue = _chartData.isNotEmpty
+        ? _chartData.last.y.toStringAsFixed(2)
+        : "--";
+
     return Container(
       width: width,
       decoration: BoxDecoration(
@@ -87,7 +124,7 @@ class UserPowerMonitoringScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            value,
+            "$latestValue V",
             style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
