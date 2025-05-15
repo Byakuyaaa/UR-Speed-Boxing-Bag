@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:io';
 
-class userPowerMonitoringScreen extends StatelessWidget {
+class UserPowerMonitoringScreen extends StatelessWidget {
+  final InternetAddress esp32IP;
+
+  UserPowerMonitoringScreen({Key? key, required this.esp32IP}) : super(key: key);
+
   final DatabaseReference _powerRef =
   FirebaseDatabase.instance.ref("sensorData/power");
 
@@ -10,14 +15,17 @@ class userPowerMonitoringScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.blueGrey[50],
       appBar: AppBar(
-        title: Text("Smart Boxing Energy"),
+        title: const Text(
+          "Smart Boxing Energy",
+          style: TextStyle(fontSize: 18, color: Colors.white),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         elevation: 0,
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: StreamBuilder<DatabaseEvent>(
             stream: _powerRef.onValue,
             builder: (context, snapshot) {
@@ -36,6 +44,11 @@ class userPowerMonitoringScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildPowerCard("Real-time Power Output", display, context),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Connected to ESP32 at: ${esp32IP.address}",
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
                 ],
               );
             },
@@ -50,7 +63,7 @@ class userPowerMonitoringScreen extends StatelessWidget {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Colors.blueAccent, Colors.lightBlueAccent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -60,22 +73,22 @@ class userPowerMonitoringScreen extends StatelessWidget {
           BoxShadow(
             color: Colors.blueAccent.withOpacity(0.3),
             blurRadius: 20,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Column(
         children: [
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             value,
-            style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
       ),

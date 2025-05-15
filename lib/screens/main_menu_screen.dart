@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 import 'searching_screen.dart';
 import 'power_monitoring_screen.dart';
@@ -22,7 +23,7 @@ class MainMenuScreen extends StatelessWidget {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.indigo, Colors.blueAccent],
+            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -33,32 +34,36 @@ class MainMenuScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildMenuButton(
+                /*_buildMenuButton(
                   icon: Icons.cable,
                   label: "Connect to the Equipment",
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => SearchingScreen()),
                   ),
-                ),
+                ),*/
                 SizedBox(height: 20),
                 _buildMenuButton(
                   icon: Icons.bolt,
                   label: "Power Monitoring",
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => PowerMonitoringScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => PowerMonitoringScreen(
+                        esp32IP: InternetAddress("192.168.43.61"),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
-                _buildMenuButton(
+                /*_buildMenuButton(
                   icon: Icons.devices,
                   label: "Device List",
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => DeviceListScreen()),
                   ),
-                ),
+                ),*/
                 SizedBox(height: 20),
                 _buildMenuButton(
                   icon: Icons.people,

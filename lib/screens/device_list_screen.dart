@@ -55,7 +55,12 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Available Devices")),
+      appBar: AppBar(title: Text(
+          style: TextStyle(fontSize: 18, color: Colors.white),
+          "Available Devices"),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,),
       body: scanning
           ? Center(child: CircularProgressIndicator())
           : devices.isEmpty

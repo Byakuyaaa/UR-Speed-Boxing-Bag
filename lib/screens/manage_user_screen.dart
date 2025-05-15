@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 class ManageUserScreen extends StatefulWidget {
   @override
   _ManageUserScreenState createState() => _ManageUserScreenState();
@@ -10,28 +10,53 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
   final _firestore = FirebaseFirestore.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _roleController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _roleController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _addUser() async {
-    if (_emailController.text.trim().isEmpty) return;
-    await _firestore.collection('users').add({
-      'email': _emailController.text.trim(),
-      'role': _roleController.text.trim().isEmpty ? 'user' : _roleController.text.trim(),
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    _emailController.clear();
-    _roleController.clear();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final role = _roleController.text.trim().isEmpty ? 'user' : _roleController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) return;
+
+    try {
+      // Step 1: Create user in Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Step 2: Save to Firestore (optional but useful for roles)
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'email': email,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User added successfully')));
+
+      // Clear inputs
+      _emailController.clear();
+      _roleController.clear();
+      _passwordController.clear();
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+    }
   }
 
-  Future<void> _editUser(String docId, String currentEmail, String currentRole) async {
+  Future<void> _editUser(String docId, String currentEmail, String currentRole, String currentPassword) async {
     _emailController.text = currentEmail;
     _roleController.text = currentRole;
+    _passwordController.text = currentPassword;
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -41,6 +66,11 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
           children: [
             TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Email')),
             TextField(controller: _roleController, decoration: InputDecoration(labelText: 'Role (user/admin)')),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(labelText: 'Password'),
+            ),
           ],
         ),
         actions: [
@@ -49,6 +79,7 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
               Navigator.pop(context);
               _emailController.clear();
               _roleController.clear();
+              _passwordController.clear();
             },
             child: Text('Cancel'),
           ),
@@ -57,10 +88,12 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
               await _firestore.collection('users').doc(docId).update({
                 'email': _emailController.text.trim(),
                 'role': _roleController.text.trim(),
+                'password': _passwordController.text.trim(), // ⚠️ In production, hash this
               });
               Navigator.pop(context);
               _emailController.clear();
               _roleController.clear();
+              _passwordController.clear();
             },
             child: Text('Save'),
           ),
@@ -76,12 +109,17 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Manage Users')),
+      appBar: AppBar(
+        title: Text("Manage Users", style: TextStyle(fontSize: 18, color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // add-user row
+            // Add-user row
             Row(
               children: [
                 Expanded(
@@ -97,11 +135,19 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
                     decoration: InputDecoration(labelText: 'Role (user/admin)'),
                   ),
                 ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: 'Password'),
+                  ),
+                ),
                 IconButton(icon: Icon(Icons.add), onPressed: _addUser),
               ],
             ),
             SizedBox(height: 20),
-            // user list
+            // User list
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: _firestore.collection('users').snapshots(),
@@ -120,8 +166,9 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
                     itemCount: docs.length,
                     itemBuilder: (context, i) {
                       final data = docs[i].data();
-                      final email = data['email'] as String? ?? '';
-                      final role = data['role'] as String? ?? '';
+                      final email = data['email'] ?? '';
+                      final role = data['role'] ?? '';
+                      final password = data['password'] ?? '';
                       return ListTile(
                         title: Text(email),
                         subtitle: Text('Role: $role'),
@@ -130,7 +177,7 @@ class _ManageUserScreenState extends State<ManageUserScreen> {
                           children: [
                             IconButton(
                               icon: Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () => _editUser(docs[i].id, email, role),
+                              onPressed: () => _editUser(docs[i].id, email, role, password),
                             ),
                             IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'dart:io';
 import 'register_screen.dart';
 import 'user_main_menu_screen.dart';
 import 'main_menu_screen.dart';
@@ -43,7 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
           } else {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => UserMainMenuScreen()),
+              MaterialPageRoute(builder: (_) => UserMainMenuScreen(
+                  esp32IP: InternetAddress("192.168.43.61")),
+              ),
             );
           }
         } else {

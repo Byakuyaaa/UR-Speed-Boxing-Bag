@@ -20,13 +20,19 @@ class _PowerGeneratedScreenState extends State<PowerGeneratedScreen> {
   @override
   void initState() {
     super.initState();
-    _powerStream = _database.child('powerGenerated').onValue;
+    _powerStream = _database.child('powerGenerated/readings').onValue;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("POWER GENERATED")),
+      appBar: AppBar(
+          title: Text(
+              style: TextStyle(fontSize: 18, color: Colors.white),
+              "Power Generated"),
+          centerTitle: true,
+          backgroundColor: Colors.blueAccent,
+          elevation: 0,),
       body: StreamBuilder<DatabaseEvent>(
         stream: _powerStream,
         builder: (context, snapshot) {
@@ -46,27 +52,11 @@ class _PowerGeneratedScreenState extends State<PowerGeneratedScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _summaryBox("Last 1 Hr", totalHour),
-                      _summaryBox("Last 24 Hrs", totalDay),
-                      _summaryBox("Last 7 Days", totalWeek),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    "kWh Saved (Estimated)",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "${monthlyTotal.toStringAsFixed(4)} kWh (approx.)",
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                  ),
-                  SizedBox(height: 16),
-                  _lineChart(),
-                  Spacer(),
+                  _summaryBox("Last 1 Hr", totalHour),
+                  SizedBox(height: 12),
+                  _summaryBox("Last 24 Hrs", totalDay),
+                  SizedBox(height: 12),
+                  _summaryBox("Last 7 Days", totalWeek),
                 ],
               ),
             );
@@ -81,20 +71,42 @@ class _PowerGeneratedScreenState extends State<PowerGeneratedScreen> {
   }
 
   Widget _summaryBox(String label, double value) {
-    return Expanded(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blueAccent, Colors.lightBlueAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blueAccent.withOpacity(0.2),
+            offset: Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 8),
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white70,
             ),
-            child: Text(
-              "${value.toStringAsFixed(4)} kWh",
-              style: TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "${value.toStringAsFixed(4)} kWh",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ],
@@ -102,23 +114,5 @@ class _PowerGeneratedScreenState extends State<PowerGeneratedScreen> {
     );
   }
 
-  Widget _lineChart() {
-    return SizedBox(
-      height: 180,
-      child: LineChart(
-        LineChartData(
-          titlesData: FlTitlesData(show: false),
-          borderData: FlBorderData(show: true),
-          lineBarsData: [
-            LineChartBarData(
-              spots: monthlySpots.isEmpty ? [FlSpot(0, 0)] : monthlySpots,
-              isCurved: true,
-              barWidth: 3,
-              dotData: FlDotData(show: false),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 }

@@ -34,7 +34,7 @@ class StartPage extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                "Kinetic Energy Harvesting Smart Boxing Bag",
+                "Kinetic Energy Harvesting Speed Boxing Bag",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
