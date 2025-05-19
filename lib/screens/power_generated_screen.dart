@@ -57,6 +57,8 @@ class _PowerGeneratedScreenState extends State<PowerGeneratedScreen> {
                   _summaryBox("Last 24 Hrs", totalDay),
                   SizedBox(height: 12),
                   _summaryBox("Last 7 Days", totalWeek),
+                  SizedBox(height: 12),
+                  _summaryBox("Last 30 Days", monthlyTotal),
                 ],
               ),
             );
