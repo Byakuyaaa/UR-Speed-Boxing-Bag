@@ -43,7 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
           } else {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => MainMenuScreen(),
+              MaterialPageRoute(builder: (_) => UserMainMenuScreen(
+                  esp32IP: InternetAddress("192.168.43.61")
+              ),
               ),
             );
           }

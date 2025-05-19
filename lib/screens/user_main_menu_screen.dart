@@ -3,6 +3,7 @@ import 'searching_screen.dart';
 import 'user_power_monitoring_screen.dart';
 import 'device_list_screen.dart';
 import 'dart:io';
+import 'power_monitoring_screen.dart';
 
 class UserMainMenuScreen extends StatelessWidget {
   final InternetAddress esp32IP;
@@ -91,7 +92,7 @@ class UserMainMenuScreen extends StatelessWidget {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UserPowerMonitoringScreen(esp32IP: esp32IP),
+                      builder: (_) => PowerMonitoringScreen(esp32IP: InternetAddress("192.168.43.61")),
                     ),
                   ),
                 ),
