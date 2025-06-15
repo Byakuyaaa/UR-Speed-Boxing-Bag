@@ -12,7 +12,7 @@ class MainMenuScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("K.E.H.S.B.B. App"),
+        title: Text("K.E.H.S.B.B. App", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -23,7 +23,7 @@ class MainMenuScreen extends StatelessWidget {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
+            colors: [Colors.black87, Colors.deepOrange.shade900],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -34,16 +34,8 @@ class MainMenuScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                /*_buildMenuButton(
-                  icon: Icons.cable,
-                  label: "Connect to the Equipment",
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => SearchingScreen()),
-                  ),
-                ),*/
-                SizedBox(height: 20),
-                _buildMenuButton(
+                SizedBox(height: 80),
+                _buildGradientButton(
                   icon: Icons.bolt,
                   label: "Power Monitoring",
                   onPressed: () => Navigator.push(
@@ -56,16 +48,7 @@ class MainMenuScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20),
-                /*_buildMenuButton(
-                  icon: Icons.devices,
-                  label: "Device List",
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DeviceListScreen()),
-                  ),
-                ),*/
-                SizedBox(height: 20),
-                _buildMenuButton(
+                _buildGradientButton(
                   icon: Icons.people,
                   label: "Manage Users",
                   onPressed: () => Navigator.push(
@@ -81,24 +64,33 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuButton({
+  Widget _buildGradientButton({
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton.icon(
-      icon: Icon(icon, size: 28),
-      label: Text(label, style: TextStyle(fontSize: 18)),
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.indigo,
-        minimumSize: Size(double.infinity, 60),
-        padding: EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.deepOrange, Colors.orangeAccent],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        elevation: 4,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ElevatedButton.icon(
+        icon: Icon(icon, size: 28, color: Colors.white),
+        label: Text(label, style: TextStyle(fontSize: 18, color: Colors.white)),
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     );
   }

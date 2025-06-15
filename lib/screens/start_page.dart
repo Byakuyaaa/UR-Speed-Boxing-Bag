@@ -1,86 +1,124 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
 class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = const Color(0xFF121212); // Deeper dark tone
+    final gradient = LinearGradient(
+      colors: [Color(0xFFFF9800), Color(0xFFFF5722)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
     return Scaffold(
-      backgroundColor: Colors.blueGrey[50],
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+      backgroundColor: backgroundColor,
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.sports_mma, size: 100, color: Colors.white),
-              SizedBox(height: 20),
+              const SizedBox(height: 50),
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: gradient,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(Icons.sports_mma, color: Colors.white, size: 30),
+              ),
+              const SizedBox(height: 32),
               Text(
                 "K.E.H.S.B.B.",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
-                  letterSpacing: 2,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 "Kinetic Energy Harvesting Speed Boxing Bag",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.4,
                 ),
               ),
-              SizedBox(height: 40),
-              ElevatedButton.icon(
-                icon: Icon(Icons.login, color: Colors.white),
-                label: Text("Login", style: TextStyle(fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurpleAccent,
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 5,
+              const SizedBox(height: 12),
+              Text(
+                "A smart, sustainable way to generate and monitor power from kinetic energy.",
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  color: Colors.grey[400],
+                  height: 1.5,
                 ),
-                onPressed: () {
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => LoginScreen()),
                   );
                 },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton.icon(
-                icon: Icon(Icons.app_registration, color: Colors.white),
-                label: Text("Sign Up", style: TextStyle(fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 56,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orangeAccent.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
                   ),
-                  elevation: 5,
+                  child: Center(
+                    child: Text(
+                      "Sign In",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
+              ),
+              const SizedBox(height: 14),
+              OutlinedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => RegisterScreen()),
                   );
                 },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.grey.shade700, width: 1.2),
+                  minimumSize: Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(
+                  "Sign Up",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    color: Colors.grey[300],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),

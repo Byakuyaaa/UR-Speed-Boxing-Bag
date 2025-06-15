@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:projects/screens/login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -12,8 +11,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String selectedRole = 'user';
+  bool isLoading = false;
 
   Future<void> register() async {
+    setState(() => isLoading = true);
     try {
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
@@ -42,21 +43,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else if (e.code == 'weak-password') {
         message = 'The password is too weak.';
       } else {
-        message = 'Sign up failed: \${e.message}';
+        message = 'Sign up failed: ${e.message}';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
+    } finally {
+      setState(() => isLoading = false);
     }
+  }
+
+  InputDecoration _darkInputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.white70),
+      filled: true,
+      fillColor: Colors.black54,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.orangeAccent, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white30),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey[50],
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text("Register", style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -67,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
+            colors: [Colors.black87, Colors.deepOrange.shade900],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -83,35 +107,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 16),
                   Text("Sign Up", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
                   SizedBox(height: 30),
+
+                  // Email field
                   TextField(
                     controller: emailController,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
+                    decoration: _darkInputDecoration("Email"),
+                    style: TextStyle(color: Colors.white),
                   ),
                   SizedBox(height: 12),
+
+                  // Password field
                   TextField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
+                    decoration: _darkInputDecoration("Password"),
+                    style: TextStyle(color: Colors.white),
                   ),
                   SizedBox(height: 12),
+
+                  // Role dropdown
                   DropdownButtonFormField<String>(
                     value: selectedRole,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Select Role",
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
+                    dropdownColor: Colors.black87,
+                    decoration: _darkInputDecoration("Select Role"),
+                    style: TextStyle(color: Colors.white),
+                    iconEnabledColor: Colors.orangeAccent,
                     items: ['user', 'admin'].map((role) {
                       return DropdownMenuItem(
                         value: role,
@@ -127,17 +147,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: register,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      minimumSize: Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+
+                  // Sign Up button
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.deepOrange, Colors.orangeAccent],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                       ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text("Sign Up", style: TextStyle(fontSize: 18)),
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : register,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Sign Up", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ),
                   ),
                 ],
               ),

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'searching_screen.dart';
-import 'user_power_monitoring_screen.dart';
-import 'device_list_screen.dart';
-import 'dart:io';
 import 'power_monitoring_screen.dart';
+import 'dart:io';
 
 class UserMainMenuScreen extends StatelessWidget {
   final InternetAddress esp32IP;
@@ -16,11 +14,22 @@ class UserMainMenuScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Enter Password"),
+          backgroundColor: Colors.black87,
+          title: Text("Enter Password", style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: _passwordController,
             obscureText: true,
-            decoration: InputDecoration(labelText: "Password"),
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: "Password",
+              labelStyle: TextStyle(color: Colors.orangeAccent),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.orangeAccent),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.orange),
+              ),
+            ),
           ),
           actions: [
             TextButton(
@@ -28,9 +37,12 @@ class UserMainMenuScreen extends StatelessWidget {
                 Navigator.of(context).pop();
                 _passwordController.clear();
               },
-              child: Text("Cancel"),
+              child: Text("Cancel", style: TextStyle(color: Colors.orangeAccent)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
               onPressed: () {
                 if (_passwordController.text == "1234") {
                   Navigator.of(context).pop();
@@ -55,9 +67,8 @@ class UserMainMenuScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("K.E.H.S.B.B. - User"),
+        title: Text("K.E.H.S.B.B. - User", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
         elevation: 0,
         leading: BackButton(color: Colors.white),
       ),
@@ -66,7 +77,7 @@ class UserMainMenuScreen extends StatelessWidget {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent.shade100],
+            colors: [Colors.black87, Colors.deepOrange.shade900],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -77,34 +88,18 @@ class UserMainMenuScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-/*                _buildMenuButton(
-                  icon: Icons.cable,
-                  label: "Connect to the Equipment",
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => SearchingScreen()),
-                  ),
-                ),*/
+                // Add more buttons if needed here
                 SizedBox(height: 20),
-                _buildMenuButton(
+                _buildGradientButton(
                   icon: Icons.bolt,
                   label: "Power Monitoring",
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PowerMonitoringScreen(esp32IP: InternetAddress("192.168.43.61")),
+                      builder: (_) => PowerMonitoringScreen(esp32IP: esp32IP),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
-/*                _buildMenuButton(
-                  icon: Icons.devices,
-                  label: "Device List",
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DeviceListScreen()),
-                  ),
-                ),*/
               ],
             ),
           ),
@@ -113,24 +108,49 @@ class UserMainMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuButton({
+  Widget _buildGradientButton({
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton.icon(
-      icon: Icon(icon, size: 28),
-      label: Text(label, style: TextStyle(fontSize: 18)),
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.indigo,
-        minimumSize: Size(double.infinity, 60),
-        padding: EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [Colors.deepOrangeAccent, Colors.orangeAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        elevation: 4,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 6,
+            offset: Offset(2, 4),
+          )
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 28, color: Colors.white),
+                SizedBox(width: 12),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
